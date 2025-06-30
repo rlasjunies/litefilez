@@ -1,0 +1,24 @@
+{
+  "Tabs": [
+    {
+      "Name": "C: Drive",
+      "Icon": "💽",
+      "Path": "C:\\"
+    },
+    {
+      "Name": "Downloads",
+      "Icon": "📥",
+      "Path": "%USERPROFILE%\\Downloads"
+    },
+    {
+      "Name": "Documents",
+      "Icon": "📄",
+      "Path": "%USERPROFILE%\\Documents"
+    },
+    {
+      "Name": "Desktop",
+      "Icon": "🖥️",
+      "Path": "%USERPROFILE%\\Desktop"
+    }
+  ]
+}
