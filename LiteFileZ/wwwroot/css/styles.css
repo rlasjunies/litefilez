@@ -107,9 +107,10 @@ body {
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     border-radius: 4px;
-    margin: 2px 0;
+    margin: 1px 0;
+    position: relative;
 }
 
 .tree-item:hover {
@@ -121,9 +122,23 @@ body {
     color: white;
 }
 
+.tree-item .expand-icon {
+    width: 16px;
+    text-align: center;
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
 .tree-item .icon {
     width: 16px;
     text-align: center;
+    font-size: 14px;
+}
+
+.tree-item .expand-icon:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
 }
 
 .file-list {

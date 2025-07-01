@@ -15,9 +15,10 @@ LiteFileZ is a lightweight, fast web-based file manager built with .NET 9, compi
 ### 🖥️ User Interface
 - **Tabbed Navigation**: Horizontal tabs spanning full page width for different locations
 - **Three-Panel Layout**:
-  - **Left Panel**: Tree view of folder hierarchy
+  - **Left Panel**: Tree view of folder hierarchy with single expand/collapse icons
   - **Middle Panel**: File and folder listing with details
   - **Right Panel**: Properties and details of selected items
+- **Clean Tree View**: Single functional icon per folder (📂 expanded, 📁 collapsed) serves both visual and interactive purposes
 
 ### 📁 File Management
 - **Mixed Listings**: Files and folders displayed together, sorted by name

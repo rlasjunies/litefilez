@@ -2,22 +2,22 @@
   "Tabs": [
     {
       "Name": "C: Drive",
-      "Icon": "💽",
+      "Icon": "\uD83D\uDCBD",
       "Path": "C:\\"
     },
     {
       "Name": "Downloads",
-      "Icon": "📥",
+      "Icon": "\uD83D\uDCE5",
       "Path": "%USERPROFILE%\\Downloads"
     },
     {
       "Name": "Documents",
-      "Icon": "📄",
+      "Icon": "\uD83D\uDCC4",
       "Path": "%USERPROFILE%\\Documents"
     },
     {
       "Name": "Desktop",
-      "Icon": "🖥️",
+      "Icon": "\uD83D\uDDA5\uFE0F",
       "Path": "%USERPROFILE%\\Desktop"
     }
   ]

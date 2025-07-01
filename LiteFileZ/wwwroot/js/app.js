@@ -172,30 +172,158 @@ class FileManager {
         }
     }
 
-    renderTreeView(items, rootPath) {
+    renderTreeView(items, rootPath, level = 0) {
         const container = document.getElementById('tree-view');
-        container.innerHTML = '';
         
-        const rootElement = document.createElement('div');
-        rootElement.className = 'tree-item selected';
-        rootElement.innerHTML = `<span class="icon">📁</span> ${this.getPathName(rootPath)}`;
-        rootElement.addEventListener('click', () => {
-            this.selectTreeItem(rootElement);
-            this.loadPath(rootPath);
-        });
-        container.appendChild(rootElement);
+        if (level === 0) {
+            container.innerHTML = '';
+            this.treeData = new Map(); // Store tree structure
+        }
+        
+        if (level === 0) {
+            const rootElement = document.createElement('div');
+            rootElement.className = 'tree-item selected';
+            rootElement.dataset.path = rootPath;
+            rootElement.dataset.level = '0';
+            rootElement.dataset.expanded = 'true';
+            rootElement.innerHTML = `
+                <span class="expand-icon">📂</span>
+                ${this.getPathName(rootPath)}
+            `;
+            rootElement.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Check if the expand icon was clicked
+                if (e.target.classList.contains('expand-icon')) {
+                    await this.toggleTreeNode(rootElement, rootPath);
+                } else {
+                    this.selectTreeItem(rootElement);
+                    await this.loadPath(rootPath);
+                }
+            });
+            container.appendChild(rootElement);
+        }
         
         items.filter(item => item.isDirectory).forEach(item => {
             const element = document.createElement('div');
             element.className = 'tree-item';
-            element.style.paddingLeft = '20px';
-            element.innerHTML = `<span class="icon">📁</span> ${item.name}`;
-            element.addEventListener('click', () => {
-                this.selectTreeItem(element);
-                this.loadPath(item.path);
+            element.dataset.path = item.path;
+            element.dataset.level = level + 1;
+            element.dataset.expanded = 'false';
+            element.style.paddingLeft = `${20 + (level * 20)}px`;
+            element.innerHTML = `
+                <span class="expand-icon">📁</span>
+                ${item.name}
+            `;
+            
+            element.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log('Tree item clicked:', item.name, 'target:', e.target.className);
+                
+                // Check if the expand icon was clicked
+                if (e.target.classList.contains('expand-icon')) {
+                    console.log('Expand icon clicked for:', item.name);
+                    await this.toggleTreeNode(element, item.path);
+                } else {
+                    console.log('Folder name clicked for:', item.name);
+                    this.selectTreeItem(element);
+                    await this.loadPath(item.path);
+                }
             });
+            
             container.appendChild(element);
         });
+    }
+
+    async toggleTreeNode(element, path) {
+        console.log('Toggling tree node:', path);
+        const isExpanded = element.dataset.expanded === 'true';
+        const level = parseInt(element.dataset.level);
+        console.log('Current state - expanded:', isExpanded, 'level:', level);
+        
+        if (isExpanded) {
+            // Collapse: remove child nodes
+            console.log('Collapsing node');
+            this.collapseTreeNode(element);
+        } else {
+            // Expand: load and show child nodes
+            console.log('Expanding node');
+            await this.expandTreeNode(element, path, level);
+        }
+    }
+
+    collapseTreeNode(element) {
+        const level = parseInt(element.dataset.level);
+        const expandIcon = element.querySelector('.expand-icon');
+        
+        // Update element state
+        element.dataset.expanded = 'false';
+        expandIcon.textContent = '📁';
+        
+        // Remove all child nodes (nodes with higher level that come after this element)
+        let nextElement = element.nextElementSibling;
+        while (nextElement && parseInt(nextElement.dataset.level) > level) {
+            const toRemove = nextElement;
+            nextElement = nextElement.nextElementSibling;
+            toRemove.remove();
+        }
+    }
+
+    async expandTreeNode(element, path, level) {
+        try {
+            console.log('Fetching tree data for path:', path);
+            const response = await fetch(`/api/files/tree?path=${encodeURIComponent(path)}`);
+            const data = await response.json();
+            console.log('Tree data received:', data);
+            
+            if (data.error) {
+                console.error('Failed to load tree children:', data.error);
+                return;
+            }
+
+            const expandIcon = element.querySelector('.expand-icon');
+            element.dataset.expanded = 'true';
+            expandIcon.textContent = '📂';
+
+            // Insert child nodes after this element
+            const childFolders = data.items.filter(item => item.isDirectory);
+            console.log('Child folders found:', childFolders.length);
+            
+            for (let i = childFolders.length - 1; i >= 0; i--) {
+                const item = childFolders[i];
+                const childElement = document.createElement('div');
+                childElement.className = 'tree-item';
+                childElement.dataset.path = item.path;
+                childElement.dataset.level = level + 1;
+                childElement.dataset.expanded = 'false';
+                childElement.style.paddingLeft = `${20 + (level + 1) * 20}px`;
+                childElement.innerHTML = `
+                    <span class="expand-icon">📁</span>
+                    ${item.name}
+                `;
+                
+                childElement.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Check if the expand icon was clicked
+                    if (e.target.classList.contains('expand-icon')) {
+                        await this.toggleTreeNode(childElement, item.path);
+                    } else {
+                        this.selectTreeItem(childElement);
+                        await this.loadPath(item.path);
+                    }
+                });
+                
+                // Insert after the parent element
+                element.parentNode.insertBefore(childElement, element.nextSibling);
+            }
+        } catch (error) {
+            console.error('Failed to expand tree node:', error);
+        }
     }
 
     selectTreeItem(selectedElement) {
@@ -213,7 +341,7 @@ class FileManager {
     async openItem(item) {
         if (item.isDirectory) {
             await this.loadPath(item.path);
-            await this.loadTreeView(this.currentTab.path);
+            await this.updateTreeViewSelection(item.path);
         } else {
             try {
                 await fetch(`/api/files/open?path=${encodeURIComponent(item.path)}`, { method: 'POST' });
@@ -222,6 +350,31 @@ class FileManager {
                 this.showError('Failed to open file');
             }
         }
+    }
+
+    async updateTreeViewSelection(path) {
+        // Find the tree item with matching path and select it
+        const treeItems = document.querySelectorAll('.tree-item');
+        let found = false;
+        
+        for (const item of treeItems) {
+            if (item.dataset.path === path) {
+                this.selectTreeItem(item);
+                found = true;
+                break;
+            }
+        }
+        
+        // If not found in current tree, we may need to expand parent folders
+        if (!found) {
+            await this.expandTreeToPath(path);
+        }
+    }
+
+    async expandTreeToPath(targetPath) {
+        // For now, just reload the tree from root
+        // A more sophisticated implementation would expand the path step by step
+        await this.loadTreeView(this.currentTab.path);
     }
 
     showItemDetails(item) {
