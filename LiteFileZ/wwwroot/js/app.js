@@ -57,6 +57,8 @@ class FileManager {
         document.addEventListener('keydown', (e) => {
             if (document.activeElement && document.activeElement.id === 'tree-view') {
                 this.handleTreeKeyNavigation(e);
+            } else if (document.activeElement && document.activeElement.id === 'file-list') {
+                this.handleFileListKeyNavigation(e);
             }
         });
 
@@ -64,6 +66,8 @@ class FileManager {
         document.addEventListener('click', (e) => {
             if (e.target.closest('#tree-view')) {
                 document.getElementById('tree-view').focus();
+            } else if (e.target.closest('#file-list')) {
+                document.getElementById('file-list').focus();
             }
         });
     }
@@ -143,6 +147,7 @@ class FileManager {
             element.className = 'file-item';
             element.dataset.path = item.path;
             element.dataset.isDirectory = item.isDirectory;
+            element.itemData = item; // Store complete item data
             
             const icon = this.getFileIcon(item);
             const size = item.isDirectory ? '' : this.formatFileSize(item.size);
@@ -386,6 +391,76 @@ class FileManager {
                 this.loadPath(currentSelected.dataset.path);
                 break;
         }
+    }
+
+    handleFileListKeyNavigation(e) {
+        const currentSelected = document.querySelector('.file-item.selected');
+        const allFileItems = Array.from(document.querySelectorAll('.file-item'));
+        
+        // If no item is selected, select the first one
+        if (!currentSelected && allFileItems.length > 0) {
+            const firstItem = allFileItems[0];
+            this.selectItem(firstItem, firstItem.itemData);
+            return;
+        }
+        
+        if (!currentSelected) return;
+
+        const currentIndex = allFileItems.indexOf(currentSelected);
+
+        switch (e.key) {
+            case 'ArrowUp':
+                e.preventDefault();
+                if (currentIndex > 0) {
+                    const prevItem = allFileItems[currentIndex - 1];
+                    this.selectItem(prevItem, prevItem.itemData);
+                    prevItem.scrollIntoView({ block: 'nearest' });
+                }
+                break;
+
+            case 'ArrowDown':
+                e.preventDefault();
+                if (currentIndex < allFileItems.length - 1) {
+                    const nextItem = allFileItems[currentIndex + 1];
+                    this.selectItem(nextItem, nextItem.itemData);
+                    nextItem.scrollIntoView({ block: 'nearest' });
+                }
+                break;
+
+            case 'ArrowLeft':
+                e.preventDefault();
+                this.navigateToParent();
+                break;
+
+            case 'Enter':
+                e.preventDefault();
+                this.openItem(currentSelected.itemData);
+                break;
+        }
+    }
+
+    navigateToParent() {
+        if (!this.currentPath) return;
+        
+        // Get parent directory path
+        const pathSeparator = this.currentPath.includes('/') ? '/' : '\\';
+        const pathParts = this.currentPath.split(pathSeparator);
+        
+        // Don't go above root level
+        if (pathParts.length <= 1 || (pathParts.length === 2 && pathParts[1] === '')) {
+            return;
+        }
+        
+        // Remove last part to get parent path
+        pathParts.pop();
+        const parentPath = pathParts.join(pathSeparator);
+        
+        // Ensure we don't get empty path
+        const finalParentPath = parentPath || (pathSeparator === '\\' ? 'C:\\' : '/');
+        
+        // Navigate to parent
+        this.loadPath(finalParentPath);
+        this.updateTreeViewSelection(finalParentPath);
     }
 
     selectItem(element, item) {
