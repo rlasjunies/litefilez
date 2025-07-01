@@ -45,6 +45,12 @@ body {
     width: 100%;
     overflow-x: auto;
     min-height: 50px;
+    outline: none;
+}
+
+.tabs-container:focus {
+    outline: 2px solid #3498db;
+    outline-offset: -2px;
 }
 
 .tab {

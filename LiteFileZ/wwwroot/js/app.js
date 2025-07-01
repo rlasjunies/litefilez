@@ -59,15 +59,19 @@ class FileManager {
                 this.handleTreeKeyNavigation(e);
             } else if (document.activeElement && document.activeElement.id === 'file-list') {
                 this.handleFileListKeyNavigation(e);
+            } else if (document.activeElement && document.activeElement.id === 'tabs-container') {
+                this.handleTabsKeyNavigation(e);
             }
         });
 
-        // Focus tree view when clicking on it
+        // Focus containers when clicking on them
         document.addEventListener('click', (e) => {
             if (e.target.closest('#tree-view')) {
                 document.getElementById('tree-view').focus();
             } else if (e.target.closest('#file-list')) {
                 document.getElementById('file-list').focus();
+            } else if (e.target.closest('#tabs-container')) {
+                document.getElementById('tabs-container').focus();
             }
         });
     }
@@ -461,6 +465,44 @@ class FileManager {
         // Navigate to parent
         this.loadPath(finalParentPath);
         this.updateTreeViewSelection(finalParentPath);
+    }
+
+    handleTabsKeyNavigation(e) {
+        const currentActiveTab = document.querySelector('.tab.active');
+        const allTabs = Array.from(document.querySelectorAll('.tab'));
+        
+        if (!currentActiveTab || allTabs.length === 0) return;
+
+        const currentIndex = allTabs.indexOf(currentActiveTab);
+
+        switch (e.key) {
+            case 'ArrowLeft':
+                e.preventDefault();
+                if (currentIndex > 0) {
+                    const prevTab = allTabs[currentIndex - 1];
+                    const tabData = this.tabs[currentIndex - 1];
+                    this.switchTab(tabData, prevTab);
+                    prevTab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                }
+                break;
+
+            case 'ArrowRight':
+                e.preventDefault();
+                if (currentIndex < allTabs.length - 1) {
+                    const nextTab = allTabs[currentIndex + 1];
+                    const tabData = this.tabs[currentIndex + 1];
+                    this.switchTab(tabData, nextTab);
+                    nextTab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                }
+                break;
+
+            case 'Enter':
+                e.preventDefault();
+                // Enter just refocuses the current tab (already selected)
+                const tabData = this.tabs[currentIndex];
+                this.switchTab(tabData, currentActiveTab);
+                break;
+        }
     }
 
     selectItem(element, item) {
