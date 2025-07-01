@@ -52,6 +52,20 @@ class FileManager {
         document.addEventListener('click', () => {
             this.hideContextMenu();
         });
+
+        // Keyboard navigation for tree view
+        document.addEventListener('keydown', (e) => {
+            if (document.activeElement && document.activeElement.id === 'tree-view') {
+                this.handleTreeKeyNavigation(e);
+            }
+        });
+
+        // Focus tree view when clicking on it
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#tree-view')) {
+                document.getElementById('tree-view').focus();
+            }
+        });
     }
 
     renderTabs() {
@@ -327,6 +341,51 @@ class FileManager {
     selectTreeItem(selectedElement) {
         document.querySelectorAll('.tree-item').forEach(item => item.classList.remove('selected'));
         selectedElement.classList.add('selected');
+    }
+
+    handleTreeKeyNavigation(e) {
+        const currentSelected = document.querySelector('.tree-item.selected');
+        if (!currentSelected) return;
+
+        const allTreeItems = Array.from(document.querySelectorAll('.tree-item'));
+        const currentIndex = allTreeItems.indexOf(currentSelected);
+
+        switch (e.key) {
+            case 'ArrowUp':
+                e.preventDefault();
+                if (currentIndex > 0) {
+                    this.selectTreeItem(allTreeItems[currentIndex - 1]);
+                    allTreeItems[currentIndex - 1].scrollIntoView({ block: 'nearest' });
+                }
+                break;
+
+            case 'ArrowDown':
+                e.preventDefault();
+                if (currentIndex < allTreeItems.length - 1) {
+                    this.selectTreeItem(allTreeItems[currentIndex + 1]);
+                    allTreeItems[currentIndex + 1].scrollIntoView({ block: 'nearest' });
+                }
+                break;
+
+            case 'ArrowRight':
+                e.preventDefault();
+                if (currentSelected.dataset.expanded === 'false') {
+                    this.toggleTreeNode(currentSelected, currentSelected.dataset.path);
+                }
+                break;
+
+            case 'ArrowLeft':
+                e.preventDefault();
+                if (currentSelected.dataset.expanded === 'true') {
+                    this.toggleTreeNode(currentSelected, currentSelected.dataset.path);
+                }
+                break;
+
+            case 'Enter':
+                e.preventDefault();
+                this.loadPath(currentSelected.dataset.path);
+                break;
+        }
     }
 
     selectItem(element, item) {
