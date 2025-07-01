@@ -136,7 +136,7 @@ class FileManager {
             
             element.innerHTML = `
                 <span class="icon">${icon}</span>
-                <span class="name">${item.name}</span>
+                <span class="name" title="${item.name}">${item.name}</span>
                 <span class="date">${date}</span>
                 <span class="size">${size}</span>
                 <div class="actions">
@@ -183,9 +183,10 @@ class FileManager {
             rootElement.dataset.path = rootPath;
             rootElement.dataset.level = '0';
             rootElement.dataset.expanded = 'true';
+            const rootName = this.getPathName(rootPath);
             rootElement.innerHTML = `
                 <span class="expand-icon">📂</span>
-                ${this.getPathName(rootPath)}
+                <span class="folder-name" title="${rootName}">${rootName}</span>
             `;
             rootElement.addEventListener('click', async (e) => {
                 e.preventDefault();
@@ -211,7 +212,7 @@ class FileManager {
             element.style.paddingLeft = `${20 + (level * 20)}px`;
             element.innerHTML = `
                 <span class="expand-icon">📁</span>
-                ${item.name}
+                <span class="folder-name" title="${item.name}">${item.name}</span>
             `;
             
             element.addEventListener('click', async (e) => {
@@ -299,7 +300,7 @@ class FileManager {
                 childElement.style.paddingLeft = `${20 + (level + 1) * 20}px`;
                 childElement.innerHTML = `
                     <span class="expand-icon">📁</span>
-                    ${item.name}
+                    <span class="folder-name" title="${item.name}">${item.name}</span>
                 `;
                 
                 childElement.addEventListener('click', async (e) => {

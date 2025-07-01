@@ -141,6 +141,13 @@ body {
     border-radius: 2px;
 }
 
+.tree-item .folder-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .file-list {
     padding: 10px;
 }
@@ -173,6 +180,9 @@ body {
 .file-item .name {
     flex: 1;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .file-item .date {
