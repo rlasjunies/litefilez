@@ -16,6 +16,11 @@ class FileManager {
             const firstTabElement = document.querySelector('.tab.active');
             await this.switchTab(this.tabs[0], firstTabElement);
         }
+        
+        // Set initial focus on tabs
+        setTimeout(() => {
+            document.getElementById('tabs-container').focus();
+        }, 100);
     }
 
     async loadConfiguration() {
@@ -53,8 +58,15 @@ class FileManager {
             this.hideContextMenu();
         });
 
-        // Keyboard navigation for tree view
+        // Global Tab key navigation
         document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                this.handleTabNavigation(e.shiftKey);
+                return;
+            }
+            
+            // Specific area navigation
             if (document.activeElement && document.activeElement.id === 'tree-view') {
                 this.handleTreeKeyNavigation(e);
             } else if (document.activeElement && document.activeElement.id === 'file-list') {
@@ -502,6 +514,29 @@ class FileManager {
                 const tabData = this.tabs[currentIndex];
                 this.switchTab(tabData, currentActiveTab);
                 break;
+        }
+    }
+
+    handleTabNavigation(shiftKey = false) {
+        const focusableElements = ['tabs-container', 'tree-view', 'file-list'];
+        const currentFocused = document.activeElement ? document.activeElement.id : null;
+        let currentIndex = focusableElements.indexOf(currentFocused);
+        
+        // If nothing is focused or unknown element, start with tabs
+        if (currentIndex === -1) {
+            currentIndex = 0;
+        } else {
+            // Move to next/previous element
+            if (shiftKey) {
+                currentIndex = currentIndex === 0 ? focusableElements.length - 1 : currentIndex - 1;
+            } else {
+                currentIndex = (currentIndex + 1) % focusableElements.length;
+            }
+        }
+        
+        const nextElement = document.getElementById(focusableElements[currentIndex]);
+        if (nextElement) {
+            nextElement.focus();
         }
     }
 
