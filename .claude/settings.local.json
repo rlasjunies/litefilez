@@ -4,7 +4,10 @@
       "Bash(dotnet build)",
       "Bash(curl:*)",
       "Bash(pkill:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "Bash(rg:*)",
+      "Bash(dotnet run)",
+      "Bash(timeout:*)"
     ],
     "deny": []
   }

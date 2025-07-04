@@ -19,6 +19,11 @@
       "Name": "Desktop",
       "Icon": "\uD83D\uDDA5\uFE0F",
       "Path": "%USERPROFILE%\\Desktop"
+    },
+    {
+      "Name": "Temp",
+      "Icon": "\uD83D\uDDA5\uFE0F",
+      "Path": "C:\\Temp"
     }
   ]
 }
